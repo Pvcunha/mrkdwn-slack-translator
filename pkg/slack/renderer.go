@@ -32,6 +32,7 @@ func NewRender(opts RendererOptions) *Renderer {
 }
 
 func (r Renderer) RenderNode(w io.Writer, node ast.Node, entering bool) ast.WalkStatus {
+	placeComma := true
 	switch node := node.(type) {
 	case *ast.Heading:
 		r.Heading(w, node, entering)
@@ -40,11 +41,12 @@ func (r Renderer) RenderNode(w io.Writer, node ast.Node, entering bool) ast.Walk
 	case *ast.HorizontalRule:
 		r.HorizontalRule(w, node, entering)
 	default:
-		logger.Debug("slack_RenderNode", "Unknown node %T", node)
+		logger.Info("slack_RenderNode", "Unknown node %T", node)
+		placeComma = false
 	}
 
 	next := ast.GetNextNode(node)
-	if next != nil {
+	if next != nil && placeComma {
 		io.WriteString(w, ",")
 	}
 	return ast.GoToNext
